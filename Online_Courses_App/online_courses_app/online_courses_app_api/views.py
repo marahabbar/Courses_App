@@ -12,8 +12,8 @@ from rest_framework import generics
 # Create your views here.
 
 class CourseApiView(APIView):
-    # authentication_classes=[JWTAuthentication]
-    # permission_classes=[IsAuthenticated] 
+    authentication_classes=[JWTAuthentication]
+    permission_classes=[IsAuthenticated] 
 
     def get(self, request, *args, **kwargs):
 
@@ -32,8 +32,8 @@ class CourseApiView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CourseDetailApiView(APIView):
-    # authentication_classes=[JWTAuthentication]
-    # permission_classes=[IsAuthenticated] 
+    authentication_classes=[JWTAuthentication]
+    permission_classes=[IsAuthenticated] 
 
     def get_object(self, course_id):
 
@@ -53,8 +53,8 @@ class CourseDetailApiView(APIView):
         return Response({'id':serializer.data["id"],
                          'name':serializer.data["name"],
                          'description':serializer.data["description"],
-                         'secations_count':len(serializer.data["Secations"]),
-                         'secations':serializer.data["Secations"],
+                         'sections_count':len(serializer.data["sections"]),
+                         'sections':serializer.data["sections"],
                          'price':serializer.data["price"],
                          'duration':serializer.data["Duration"],
                          'image':serializer.data["Image"],
@@ -82,6 +82,51 @@ class CourseDetailApiView(APIView):
             return  status.HTTP_400_BAD_REQUEST
             
         course_instance.delete()
+        return status.HTTP_200_OK
+
+
+class sectionDetailApiView(APIView):
+    authentication_classes=[JWTAuthentication]
+    permission_classes=[IsAuthenticated] 
+
+    def get_object(self,section_id):
+
+        try:
+            return section.objects.get(id=section_id)
+        except section.DoesNotExist:
+            return status.HTTP_404_NOT_FOUND
+
+
+    def get(self, request, section_id, *args, **kwargs):
+
+        section_instance = self.get_object(section_id)
+        if not section_instance:
+            return status.HTTP_400_BAD_REQUEST
+
+        serializer = sectionDetailsSerializer(section_instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    # 4. Update
+    def put(self, request, section_id, *args, **kwargs):
+
+        section_instance = self.get_object(section_id)
+        if not section_instance:
+            return status.HTTP_400_BAD_REQUEST
+
+        serializer = sectionSerializer(instance = section_instance, data=request.data, partial = True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # 5. Delete
+    def delete(self, request, section_id, *args, **kwargs):
+
+        section_instance = self.get_object(section_id)
+        if not section_instance:
+            return  status.HTTP_400_BAD_REQUEST
+            
+        section_instance.delete()
         return status.HTTP_200_OK
 
 

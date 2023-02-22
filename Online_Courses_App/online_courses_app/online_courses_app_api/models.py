@@ -72,7 +72,7 @@ class Year_Course(models.Model):
         return self.faculty
 
 
-class Secation(models.Model):
+class section(models.Model):
     name = models.CharField(max_length = 180)
     description= models.CharField(max_length = 255)
     course=models.ForeignKey(Course, on_delete = models.CASCADE)
@@ -103,7 +103,7 @@ class Instructor_Course(models.Model):
 
 class Quiz(models.Model):
     title = models.CharField(max_length = 180)
-    secation=models.ForeignKey(Secation, on_delete = models.CASCADE)
+    section=models.ForeignKey(section, on_delete = models.CASCADE)
 
     def __str__(self):
         return self.title
@@ -122,7 +122,7 @@ class Question(models.Model):
 class Video(models.Model):
     title = models.CharField(max_length = 180)
     url = models.URLField()
-    secation=models.ForeignKey(Secation, on_delete = models.CASCADE)
+    section=models.ForeignKey(section, on_delete = models.CASCADE)
 
     def __str__(self):
         return self.title
@@ -130,7 +130,7 @@ class Video(models.Model):
 class Assessed_Reading(models.Model):
     title = models.CharField(max_length = 180)
     content = models.TextField()
-    secation=models.ForeignKey(Secation, on_delete = models.CASCADE)
+    section=models.ForeignKey(section, on_delete = models.CASCADE)
 
     def __str__(self):
         return self.title   
@@ -155,10 +155,10 @@ class studied(models.Model):
     def __str__(self):
         return self.title
 
-class Enrolled_Secation(models.Model):
+class Enrolled_section(models.Model):
     enrollment_date = models.DateField()
     expiry_date = models.DateField()
-    secation =models.ForeignKey(Secation, on_delete = models.CASCADE)
+    section =models.ForeignKey(section, on_delete = models.CASCADE)
     student=models.ForeignKey(Student, on_delete = models.CASCADE)
 
     def __str__(self):

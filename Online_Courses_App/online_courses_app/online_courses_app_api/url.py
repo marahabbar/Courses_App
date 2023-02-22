@@ -10,5 +10,6 @@ urlpatterns = [
     path('login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('courses', CourseApiView.as_view(), name='token_refresh'),
     path('course/<int:course_id>', CourseDetailApiView.as_view(), name='token_refresh'),
+    path('section/<int:section_id>', sectionDetailApiView.as_view()),
 
 ]

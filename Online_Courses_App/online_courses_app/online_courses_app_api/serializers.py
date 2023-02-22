@@ -108,7 +108,7 @@ class Assessed_ReadingSerializer(serializers.ModelSerializer):
 
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
-        Model = Question
+        model = Question
         fields = '__all__'  
 
 class QuizSerializer(serializers.ModelSerializer):
@@ -117,24 +117,27 @@ class QuizSerializer(serializers.ModelSerializer):
         model = Quiz
         fields = '__all__'
 
-class SecationSerializer(serializers.ModelSerializer):
+class sectionDetailsSerializer(serializers.ModelSerializer):
     Quizs = QuizSerializer(source='quiz_set', many=True) 
     Assessed_Reading = Assessed_ReadingSerializer(source='assessed_reading_set', many=True) 
     Videos= VideoSerializer(source='video_set', many=True) 
     class Meta:
-        model = Secation
+        model = section
+        fields = '__all__'
+
+class sectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = section
         fields = '__all__'
 
 class CourseSerializer(serializers.ModelSerializer):
-    # places = PlaceSerializer(many=True, required=False)
-    # Secations = SecationSerializer(source='secation_set', many=True) 
     class Meta:
         model = Course
         fields = '__all__'  
 
 class CourseDetailSerializer(serializers.ModelSerializer):
     # places = PlaceSerializer(many=True, required=False)
-    Secations = SecationSerializer(source='secation_set', many=True) 
+    sections = sectionSerializer(source='section_set', many=True) 
     class Meta:
         model = Course
         fields = '__all__'  
@@ -149,9 +152,9 @@ class studiedSerializer(serializers.HyperlinkedModelSerializer):
         model = studied
         fields = '__all__'
 
-class Enrolled_SecationSerializer(serializers.HyperlinkedModelSerializer):
+class Enrolled_sectionSerializer(serializers.HyperlinkedModelSerializer):
     class meta:
-        model = Enrolled_Secation
+        model = Enrolled_section
         fields = '__all__'    
 
 class Answered_QuestionSerializer(serializers.HyperlinkedModelSerializer):
