@@ -116,11 +116,26 @@ class QuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
         fields = '__all__'
+class VideoByGroupSerializer(serializers.ModelSerializer):
+    # group = serializers.SerializerMethodField()
+
+
+    def _build_video_list(group,o):
+        videos = Video.objects.filter(group=group)
+        serializer = VideoSerializer(videos, many=True)
+        return serializer.data
+
+    def get_group(self, obj):
+        return self._build_video_list(Video.group)
+
+    class Meta:
+        model = Video
+        fields =['group']
 
 class sectionDetailsSerializer(serializers.ModelSerializer):
-    Quizs = QuizSerializer(source='quiz_set', many=True) 
-    Assessed_Reading = Assessed_ReadingSerializer(source='assessed_reading_set', many=True) 
     Videos= VideoSerializer(source='video_set', many=True) 
+    Assessed_Reading = Assessed_ReadingSerializer(source='assessed_reading_set', many=True) 
+    Quizs = QuizSerializer(source='quiz_set', many=True) 
     class Meta:
         model = section
         fields = '__all__'

@@ -102,8 +102,20 @@ class sectionDetailApiView(APIView):
         section_instance = self.get_object(section_id)
         if not section_instance:
             return status.HTTP_400_BAD_REQUEST
-
         serializer = sectionDetailsSerializer(section_instance)
+        if  section_instance.withGroups:
+            videos_list=[]
+            for video in serializer.data['Videos']:
+                 videos_dic={"id" : video["id"],"url":video["url"],"title":video["title"]}
+                 added=False
+                 for i,group in enumerate(videos_list):
+                     if video["group"]==videos_list[i]["group"]:
+                         videos_list[i]["videos"].append(videos_dic)
+                         added=True
+                 if not added:
+                    videos_list.append({"group":video["group"],"videos":[videos_dic]})
+            serializer.data["Videos"].extend(videos_list)
+            del serializer.data["Videos"][0] 
         return Response(serializer.data, status=status.HTTP_200_OK)
     # 4. Update
     def put(self, request, section_id, *args, **kwargs):
@@ -285,7 +297,6 @@ class StudentSignUp(generics.CreateAPIView):
         
         refresh = RefreshToken.for_user(user)
         access_token = refresh.access_token
-        access_token.set_exp(lifetime=timedelta(days=200)) 
 
         return Response({
                 'id': str(student.id),

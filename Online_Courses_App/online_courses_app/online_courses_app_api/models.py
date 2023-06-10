@@ -56,7 +56,7 @@ class Course(models.Model):
     name = models.CharField(max_length = 180)
     description= models.CharField(max_length = 255)
     price= models.FloatField(null=True)
-    Duration=models.DurationField(null=True)
+    Duration=models.FloatField(null=True)
     Image = models.ImageField(upload_to=Course_Files,null=True)
 
 
@@ -77,6 +77,9 @@ class section(models.Model):
     description= models.CharField(max_length = 255)
     course=models.ForeignKey(Course, on_delete = models.CASCADE)
     price= models.FloatField(null=True)
+    Duration=models.FloatField(null=True)
+    withGroups=models.BooleanField(default=False)
+
 
 
     def __str__(self):
@@ -122,6 +125,7 @@ class Question(models.Model):
 class Video(models.Model):
     title = models.CharField(max_length = 180)
     url = models.URLField()
+    group = models.CharField(max_length = 180, null = True)
     section=models.ForeignKey(section, on_delete = models.CASCADE)
 
     def __str__(self):
