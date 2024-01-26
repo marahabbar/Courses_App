@@ -44,11 +44,11 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'password', 'first_name')
-        extra_kwargs = {
-            'first_name': {'required': True},
-            # 'last_name': {'required': True}
-        }
+        fields = ('email', 'password')
+        # extra_kwargs = {
+        #     'first_name': {'required': True},
+        #     'last_name': {'required': True}
+        # }
 
     # def validate(self, attrs):
     #     if attrs['password'] != attrs['password2']:
@@ -76,12 +76,12 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class UniversitySerializer(serializers.HyperlinkedModelSerializer):
-    class meta:
+    class Meta:
         model = University
         fields = '__all__'
 
 class FacultySerializer(serializers.HyperlinkedModelSerializer):
-    class meta:
+    class Meta:
         model = Faculty
         fields = '__all__'        
 
@@ -132,10 +132,18 @@ class VideoByGroupSerializer(serializers.ModelSerializer):
         model = Video
         fields =['group']
 
+class sectionItemSerializer(serializers.ModelSerializer):
+    video= VideoSerializer() 
+    assessed_reading = Assessed_ReadingSerializer() 
+    quiz = QuizSerializer() 
+    class Meta:
+        model = section_item
+        fields = '__all__'
+
 class sectionDetailsSerializer(serializers.ModelSerializer):
-    Videos= VideoSerializer(source='video_set', many=True) 
-    Assessed_Reading = Assessed_ReadingSerializer(source='assessed_reading_set', many=True) 
-    Quizs = QuizSerializer(source='quiz_set', many=True) 
+    # Videos= VideoSerializer(source='video_set', many=True) 
+    # Assessed_Reading = Assessed_ReadingSerializer(source='assessed_reading_set', many=True) 
+    section_item = sectionItemSerializer(source='section_item_set', many=True)
     class Meta:
         model = section
         fields = '__all__'
@@ -151,29 +159,32 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = '__all__'  
 
 class CourseDetailSerializer(serializers.ModelSerializer):
-    # places = PlaceSerializer(many=True, required=False)
     sections = sectionSerializer(source='section_set', many=True) 
     class Meta:
         model = Course
         fields = '__all__'  
 
-class StudentSerializer(serializers.HyperlinkedModelSerializer):
-    class meta:
+class StudentSerializer(serializers.ModelSerializer):
+    class Meta:
         model = Student
         fields = '__all__'  
 
 class studiedSerializer(serializers.HyperlinkedModelSerializer):
-    class meta:
+    class Meta:
         model = studied
         fields = '__all__'
 
-class Enrolled_sectionSerializer(serializers.HyperlinkedModelSerializer):
-    class meta:
+class Enrolled_sectionSerializer(serializers.ModelSerializer):
+    class Meta:
         model = Enrolled_section
         fields = '__all__'    
 
-class Answered_QuestionSerializer(serializers.HyperlinkedModelSerializer):
-    class meta:
+class Answered_QuestionSerializer(serializers.ModelSerializer):
+    class Meta:
         model = Answered_Question
         fields = '__all__'
 
+class Enrollment_CodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Enrollment_Code
+        fields = '__all__'

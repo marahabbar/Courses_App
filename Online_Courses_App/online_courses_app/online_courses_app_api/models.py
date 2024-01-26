@@ -20,7 +20,7 @@ class User(AbstractUser):
     # username = None
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    REQUIRED_FIELDS = ['username']
     # def __str__(self):
     #     return "{}".format(self.email)  
 
@@ -105,8 +105,9 @@ class Instructor_Course(models.Model):
 
 
 class Quiz(models.Model):
-    title = models.CharField(max_length = 180)
-    section=models.ForeignKey(section, on_delete = models.CASCADE)
+    # title = models.CharField(max_length = 180)
+    instructions = models.CharField(max_length = 255,null=True)
+    # section=models.ForeignKey(section, on_delete = models.CASCADE)
 
     def __str__(self):
         return self.title
@@ -123,27 +124,40 @@ class Question(models.Model):
         return self.question
 
 class Video(models.Model):
-    title = models.CharField(max_length = 180)
+    # title = models.CharField(max_length = 180)
     url = models.URLField()
-    group = models.CharField(max_length = 180, null = True)
-    section=models.ForeignKey(section, on_delete = models.CASCADE)
+    # group = models.CharField(max_length = 180, null = True)
+    # section=models.ForeignKey(section, on_delete = models.CASCADE)
 
     def __str__(self):
         return self.title
 
 class Assessed_Reading(models.Model):
-    title = models.CharField(max_length = 180)
+    # title = models.CharField(max_length = 180)
     content = models.TextField()
-    section=models.ForeignKey(section, on_delete = models.CASCADE)
+    # section=models.ForeignKey(section, on_delete = models.CASCADE)
 
     def __str__(self):
         return self.title   
 
+    
+class section_item(models.Model):
+    title = models.CharField(max_length = 180,null = True)
+    group = models.CharField(max_length = 180, null = True)
+    video = models.ForeignKey(Video, on_delete = models.CASCADE, null = True)
+    quiz = models.ForeignKey(Quiz, on_delete = models.CASCADE, null = True)
+    assessed_reading = models.ForeignKey(Assessed_Reading, on_delete = models.CASCADE, null = True)
+    item_type= models.IntegerField(max_length = 255,default=1)
+    item_order= models.IntegerField(max_length = 255)
+    section=models.ForeignKey(section, on_delete = models.CASCADE)
+
+    def __str__(self):
+        return self.name
 
 class Student(models.Model):
-    first_name = models.CharField(max_length = 180)
-    last_name = models.CharField(max_length = 180)
-    email = models.EmailField()
+    full_name = models.CharField(max_length = 180)
+    # last_name = models.CharField(max_length = 180)
+    # email = models.EmailField()
     phone= PhoneNumberField(unique = True, null = False, blank = False)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     
@@ -159,10 +173,20 @@ class studied(models.Model):
     def __str__(self):
         return self.title
 
+class Enrollment_Code(models.Model):
+    code = models.CharField(max_length = 180)
+    enrolled_section =models.ForeignKey(section, on_delete = models.CASCADE)
+    status=models.SmallIntegerField(default=0)# sold /used
+    validity_period= models.IntegerField(default=0)# dayes #0 = forever
+    updated_at = models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return self.code 
+    
 class Enrolled_section(models.Model):
-    enrollment_date = models.DateField()
+    enrollment_date = models.DateField(auto_now_add=True)
     expiry_date = models.DateField()
-    section =models.ForeignKey(section, on_delete = models.CASCADE)
+    mac_address=models.CharField(max_length = 180,null=True)
+    section =models.ForeignKey(section, on_delete = models.CASCADE,null=True)
     student=models.ForeignKey(Student, on_delete = models.CASCADE)
 
     def __str__(self):
