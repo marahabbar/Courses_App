@@ -367,6 +367,7 @@ class StudentSignUp(generics.CreateAPIView):
 
         if  user_serializer.is_valid():
             user=user_serializer.save()
+            user.set_password(request.data['password'])
             user.is_student=True
             user.save()
             student_serializer=StudentSerializer(data={"full_name":request.data['full_name'],
