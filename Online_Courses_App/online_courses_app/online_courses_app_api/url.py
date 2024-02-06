@@ -14,5 +14,6 @@ urlpatterns = [
     path('section/enroll/<int:section_id>', EnrolledSectionApiView.as_view()),
     path('codes/', EnrollmentCodeApiView.as_view()),
     path('codes/sold/<int:code_id>', EnrollmentCodeApiView.as_view()),
+    path('login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair')
 
 ]

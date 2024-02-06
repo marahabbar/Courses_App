@@ -44,7 +44,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'password')
+        fields = ('email', 'password','username')
         # extra_kwargs = {
         #     'first_name': {'required': True},
         #     'last_name': {'required': True}
@@ -74,7 +74,19 @@ class RegisterSerializer(serializers.ModelSerializer):
     #             'access': str(access_token),
     #     })
 
-
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        # The default result (access/refresh tokens)
+        data = super(CustomTokenObtainPairSerializer, self).validate(attrs)
+        # Custom data
+        if self.user.is_student:
+            c=Student.objects.filter(user_id=self.user.id)
+            if len(c)>0:
+                data.update({'id': c[0].id,
+                             'full_name':c[0].full_name,
+                             'username':self.user.username})
+        return data 
+    
 class UniversitySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = University

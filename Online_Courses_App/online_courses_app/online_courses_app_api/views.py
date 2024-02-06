@@ -356,7 +356,7 @@ class StudentSignUp(generics.CreateAPIView):
     
     def post(self, request , *args, **kwargs):
         user_serializer = RegisterSerializer(data={
-            # username=validated_data['username'],
+            "username":request.data['email'],
             "email":request.data['email'],
             "full_name":request.data['full_name'],
             "password":request.data['password']
@@ -380,10 +380,14 @@ class StudentSignUp(generics.CreateAPIView):
                 access_token = refresh.access_token
 
                 return Response({'id': str(student.id),
-                                'access': str(access_token)},status=status.HTTP_200_OK)
+                                 'full_name':student.full_name,
+                                 'username':user.username,
+                                 'access': str(access_token)},status=status.HTTP_200_OK)
             user.delete()
             return Response(student_serializer.errors, status=status.HTTP_200_OK)
         
         return Response(user_serializer.errors, status=status.HTTP_200_OK)
 
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer  
 
