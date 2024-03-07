@@ -21,7 +21,7 @@ class CourseApiView(APIView):
             courses = Course.objects.all()
             serializer = CourseSerializer(courses, many=True)
 
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({"data":serializer.data}, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
 
@@ -51,7 +51,7 @@ class CourseDetailApiView(APIView):
             return status.HTTP_400_BAD_REQUEST
 
         serializer = CourseDetailSerializer(course_instance)
-        return Response({'id':serializer.data["id"],
+        return Response({"data":{'id':serializer.data["id"],
                          'name':serializer.data["name"],
                          'description':serializer.data["description"],
                          'sections_count':len(serializer.data["sections"]),
@@ -60,7 +60,7 @@ class CourseDetailApiView(APIView):
                          'duration':serializer.data["Duration"],
                          'image':serializer.data["Image"],
 
-                        }, status=status.HTTP_200_OK)
+                        }}, status=status.HTTP_200_OK)
     # 4. Update
     def put(self, request, course_id, *args, **kwargs):
 
@@ -100,12 +100,11 @@ class sectionDetailApiView(APIView):
 
     def get(self, request, section_id,mac=None,student_id=None, *args, **kwargs):
         # test enrollment
-        try:
-           enrolled_section=Enrolled_section.objects.get(mac_address=mac,section_id=section_id,student=student_id)
-        except Enrolled_section.DoesNotExist:
-            return Response("not enrolled yet", status=status.HTTP_200_OK) 
-        if enrolled_section.expiry_date < datetime.datetime.now().date():
-            return Response("code is expired", status=status.HTTP_200_OK) 
+        # try:
+        #    enrolled_section=Enrolled_section.objects.get(mac_address=mac,section_id=section_id,student=student_id)
+        # except Enrolled_section.DoesNotExist:
+        #     return Response("not enrolled yet", status=status.HTTP_200_OK) 
+       
         
         section_instance = self.get_object(section_id)
         if not section_instance:
@@ -131,7 +130,7 @@ class sectionDetailApiView(APIView):
                     items_list.append({"group":item["group"],"items":[item_dic]})
    
             
-        return Response(items_list, status=status.HTTP_200_OK)
+        return Response({"data":items_list}, status=status.HTTP_200_OK)
     # 4. Update
     def put(self, request, section_id, *args, **kwargs):
 
@@ -249,7 +248,7 @@ class StudentDetailApiView(APIView):
         try:
             return Student.objects.get(id=Student_id)
         except Student.DoesNotExist:
-            return status.HTTP_404_NOT_FOUND
+            return Response("not found", status=status.HTTP_200_OK)
 
 
     def get(self, request, Student_id, *args, **kwargs):
@@ -264,16 +263,16 @@ class StudentDetailApiView(APIView):
     # 4. Update
     def put(self, request, Student_id, *args, **kwargs):
 
-        Student_instance = self.get_object(Student_id)
-        if not Student_instance:
-            return status.HTTP_400_BAD_REQUEST
+        student = self.get_object(Student_id)
+        if not student:
+            return Response("not found", status=status.HTTP_200_OK)
 
-        serializer = CourseSerializer(instance = Student_instance, data=request.data, partial = True)
+        serializer = StudentSerializer(instance = student, data=request.data, partial = True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_200_OK)
 
     # 5. Delete
     def delete(self, request, Student_id, *args, **kwargs):
@@ -327,17 +326,24 @@ class EnrolledSectionApiView(APIView):
 
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request,section_id, *args, **kwargs):
-        code=Enrollment_Code.objects.filter(code=request.data['code'],enrolled_section=section_id,status=1)
+    def post(self, request,section_id=None,course_id=None, *args, **kwargs):
+        code=Enrollment_Code.objects.filter(code=request.data['code'],enrolled_section=section_id,enrolled_course=course_id,status=1)
         if code:
             #enroll
-            
-            serializer = Enrolled_sectionSerializer(data={"expiry_date": (datetime.datetime.now() +relativedelta(days=code[0].validity_period)).strftime("%Y-%m-%d"),
-                                                          "mac_address":request.data['mac_address'],
-                                                          "student":request.data['student'],
-                                                          "section":section_id
-                                                          }
-                                                    )
+            if section_id:
+                serializer = Enrolled_sectionSerializer(data={"mac_address":request.data['mac_address'],
+                                                            "student":request.data['student'],
+                                                            "section":section_id
+                                                            }
+                                                        )
+            elif course_id:
+                sections=section.objects.filter(course=course_id)  
+                for section in sections: 
+                    serializer = Enrolled_sectionSerializer(data={"mac_address":request.data['mac_address'],
+                                            "student":request.data['student'],
+                                            "section":section.id
+                                            }
+                                        )
             if serializer.is_valid():
                 serializer.save()
                 code[0].status=2
@@ -391,3 +397,32 @@ class StudentSignUp(generics.CreateAPIView):
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer  
 
+class QuizApiView(APIView):
+    authentication_classes=[JWTAuthentication]
+    permission_classes=[IsAuthenticated] 
+
+    def get(self, request,quiz_id, *args, **kwargs):
+        try:
+            quiz = Quiz.objects.get(id=quiz_id)
+        except Quiz.DoesNotExist:
+            return status.HTTP_200_OK
+            
+        serializer = QuizSerializer(quiz)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+
+        serializer = Answered_QuestionSerializer(data=request.data,many=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_200_OK)
+
+
+def disactive_codes(request):
+    codes=Enrollment_Code.objects.all()
+    codes.update(status=3)
+
+    return Response(status=status.HTTP_200_OK)

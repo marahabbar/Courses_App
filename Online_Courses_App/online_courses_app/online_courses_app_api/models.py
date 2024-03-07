@@ -78,6 +78,7 @@ class section(models.Model):
     course=models.ForeignKey(Course, on_delete = models.CASCADE)
     price= models.FloatField(null=True)
     Duration=models.FloatField(null=True)
+    type= models.IntegerField(default=1)# 1paid 2 free
     withGroups=models.BooleanField(default=False)
 
 
@@ -108,7 +109,7 @@ class Quiz(models.Model):
     # title = models.CharField(max_length = 180)
     instructions = models.CharField(max_length = 255,null=True)
     # section=models.ForeignKey(section, on_delete = models.CASCADE)
-
+    repeat_times= models.IntegerField(default=0)# 0 = no limit
     def __str__(self):
         return self.title
 
@@ -160,7 +161,8 @@ class Student(models.Model):
     # email = models.EmailField()
     phone= PhoneNumberField(unique = True, null = False, blank = False)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    
+    faculty = models.ForeignKey(University_Faculty, on_delete = models.CASCADE,null=True)
+    year=models.IntegerField(null=True)
     def __str__(self):
         return self.first_name
 
@@ -175,16 +177,18 @@ class studied(models.Model):
 
 class Enrollment_Code(models.Model):
     code = models.CharField(max_length = 180)
-    enrolled_section =models.ForeignKey(section, on_delete = models.CASCADE)
-    status=models.SmallIntegerField(default=0)# sold /used
-    validity_period= models.IntegerField(default=0)# dayes #0 = forever
+    enrolled_section =models.ForeignKey(section, on_delete = models.CASCADE,null=True)
+    enrolled_course =models.ForeignKey(Course, on_delete = models.CASCADE,null=True)
+    status=models.SmallIntegerField(default=0)# 1 sold  2 used  3 expired 
+    # validity_period= models.IntegerField(default=0)# dayes #0 = forever
+    type= models.IntegerField(default=1)# 1 paid / 2 free
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return self.code 
     
 class Enrolled_section(models.Model):
     enrollment_date = models.DateField(auto_now_add=True)
-    expiry_date = models.DateField()
+    # expiry_date = models.DateField()
     mac_address=models.CharField(max_length = 180,null=True)
     section =models.ForeignKey(section, on_delete = models.CASCADE,null=True)
     student=models.ForeignKey(Student, on_delete = models.CASCADE)
