@@ -57,7 +57,7 @@ class Course(models.Model):
     description= models.CharField(max_length = 255)
     price= models.FloatField(null=True)
     Duration=models.FloatField(null=True)
-    Image = models.ImageField(upload_to=Course_Files,null=True)
+    Image = models.CharField(max_length =255,null=True)
 
 
 
