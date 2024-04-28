@@ -12,6 +12,8 @@ urlpatterns = [
     path('course/<int:course_id>', CourseDetailApiView.as_view(), name='token_refresh'),
     path('section/<int:section_id>/<int:student_id>/<str:mac>', sectionDetailApiView.as_view()),
     path('section/enroll/<int:section_id>', EnrolledSectionApiView.as_view()),
+    path('quiz/<int:quiz_id>/<int:student_id>', QuizApiView.as_view()),
+    path('pdf/<int:pdf_id>', AssessedReadingApiView.as_view()),
     path('codes/', EnrollmentCodeApiView.as_view()),
     path('codes/sold/<int:code_id>', EnrollmentCodeApiView.as_view()),
     path('login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair')

@@ -116,11 +116,11 @@ class sectionDetailApiView(APIView):
             for item in section_items:
                  item_dic={"title":item["title"],"type":item["item_type"]}
                  if item["item_type"]==1:
-                    item_dic['item']=item["video"]
+                    item_dic['item']={"id":item["video"]['id'],'data':item["video"]["url"]}
                  elif item["item_type"]==2:
-                    item_dic['item']=item["assessed_reading"]
+                    item_dic['item']={"id":item["assessed_reading"]['id'],'data':item["assessed_reading"]["content"]}
                  elif item["item_type"]==3:
-                    item_dic['item']=item["quiz"]    
+                    item_dic['item']={"id":item["quiz"]['id'],'data':item["quiz"]["instructions"]}   
                  added=False
                  for i,group in enumerate(items_list):
                      if item["group"]==items_list[i]["group"]:
@@ -401,15 +401,26 @@ class QuizApiView(APIView):
     authentication_classes=[JWTAuthentication]
     permission_classes=[IsAuthenticated] 
 
-    def get(self, request,quiz_id, *args, **kwargs):
+    def get(self, request,quiz_id,student_id=None, *args, **kwargs):
         try:
             quiz = Quiz.objects.get(id=quiz_id)
         except Quiz.DoesNotExist:
             return status.HTTP_200_OK
             
         serializer = QuizSerializer(quiz)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        can_take_test=True
+        if student_id:
+            for i,q in enumerate(serializer.data['Questions']):
+                answered_question=Answered_Question.objects.filter(student_id=student_id,question_id=q['id'])
+                previous_answer=''
+                if answered_question:
+                    can_take_test=False
+                    previous_answer=answered_question[0].answer
+                
+                serializer.data['Questions'][i]["previous_answer"]=previous_answer
+        data= serializer.data
+        data['can_take_test']=can_take_test
+        return Response(data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
 
@@ -419,7 +430,35 @@ class QuizApiView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_200_OK)
+class AssessedReadingApiView(APIView):
+    # authentication_classes=[JWTAuthentication]
+    # permission_classes=[IsAuthenticated] 
 
+    def get(self, request,pdf_id, *args, **kwargs):
+        try:
+            pdf = Assessed_Reading.objects.get(id=pdf_id)
+        except Assessed_Reading.DoesNotExist:
+            return status.HTTP_200_OK
+            
+        pdf_file_in_bytes = pdf.content.read()  # file is a FileField
+        pdf_file_name = "PDF-"+str(pdf_id)+'.pdf'
+        response = Response(
+            headers={'Content-Disposition': f'attachment; filename={pdf_file_name}'},
+            content_type='application/pdf'
+        )
+        response.content = pdf_file_in_bytes
+        response.status_code=status.HTTP_200_OK
+        return response
+        # return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # def post(self, request, *args, **kwargs):
+
+    #     serializer = Answered_QuestionSerializer(data=request.data,many=True)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    #     return Response(serializer.errors, status=status.HTTP_200_OK)
 
 def disactive_codes(request):
     codes=Enrollment_Code.objects.all()

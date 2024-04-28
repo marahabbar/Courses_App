@@ -119,7 +119,10 @@ class Question(models.Model):
     second_choice = models.CharField(max_length = 180)
     third_choice = models.CharField(max_length = 180)
     forth_choice = models.CharField(max_length = 180)
+    fifth_choice = models.CharField(max_length = 180)
+    sixth_choice = models.CharField(max_length = 180)
     right_choice = models.SmallIntegerField()
+    explanation=models.CharField(max_length = 255)
     quiz=models.ForeignKey(Quiz, on_delete = models.CASCADE)
     def __str__(self):
         return self.question
@@ -135,7 +138,7 @@ class Video(models.Model):
 
 class Assessed_Reading(models.Model):
     # title = models.CharField(max_length = 180)
-    content = models.TextField()
+    content = models.FileField(upload_to="files/")
     # section=models.ForeignKey(section, on_delete = models.CASCADE)
 
     def __str__(self):
