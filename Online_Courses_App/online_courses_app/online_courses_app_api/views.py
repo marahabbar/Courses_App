@@ -98,7 +98,7 @@ class sectionDetailApiView(APIView):
             return status.HTTP_404_NOT_FOUND
 
 
-    def get(self, request, section_id,mac=None,student_id=None, *args, **kwargs):
+    def get(self, request, section_id,student_id=None, *args, **kwargs):
         # test enrollment
         # try:
         #    enrolled_section=Enrolled_section.objects.get(mac_address=mac,section_id=section_id,student=student_id)
@@ -331,7 +331,8 @@ class EnrolledSectionApiView(APIView):
         if code:
             #enroll
             if section_id:
-                serializer = Enrolled_sectionSerializer(data={"mac_address":request.data['mac_address'],
+                serializer = Enrolled_sectionSerializer(data={
+                    # "mac_address":request.data['mac_address'],
                                                             "student":request.data['student'],
                                                             "section":section_id
                                                             }
@@ -339,7 +340,8 @@ class EnrolledSectionApiView(APIView):
             elif course_id:
                 sections=section.objects.filter(course=course_id)  
                 for section in sections: 
-                    serializer = Enrolled_sectionSerializer(data={"mac_address":request.data['mac_address'],
+                    serializer = Enrolled_sectionSerializer(data={
+                        # "mac_address":request.data['mac_address'],
                                             "student":request.data['student'],
                                             "section":section.id
                                             }
